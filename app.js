@@ -83,9 +83,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Update header to show client name
 function updateClientHeader() {
     const clientName = getCurrentClient();
-    if (clientName !== 'default') {
-        const tagline = document.querySelector('.tagline');
-        tagline.textContent = `Interview Archive & Portal - ${clientName.charAt(0).toUpperCase() + clientName.slice(1)}`;
+    const clientNameElement = document.getElementById('client-name');
+    if (clientNameElement && clientName !== 'default') {
+        const formattedName = clientName.charAt(0).toUpperCase() + clientName.slice(1);
+        clientNameElement.textContent = `Authority Magazine - ${formattedName}`;
     }
 }
 
