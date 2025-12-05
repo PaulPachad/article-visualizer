@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="index.css">
     <style>
         .admin-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 50px auto;
             padding: 40px;
             background: var(--bg-secondary);
@@ -117,6 +117,29 @@
             outline: none;
             border-color: var(--accent-primary);
         }
+
+        .help-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: var(--radius-sm);
+        }
+
+        .help-box h4 {
+            margin: 0 0 10px 0;
+            color: #1e40af;
+        }
+
+        .help-box ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .help-box li {
+            margin-bottom: 5px;
+            color: #1e3a8a;
+        }
     </style>
 </head>
 
@@ -124,28 +147,47 @@
     <div class="admin-container">
         <h1 class="admin-title">📊 Client Manager</h1>
 
+        <div class="help-box">
+            <h4>📋 How to Add a Client:</h4>
+            <ol>
+                <li>Open the client's Google Sheet</li>
+                <li>Click <strong>File → Share → Publish to web</strong></li>
+                <li>Select <strong>"Comma-separated values (.csv)"</strong> from dropdown</li>
+                <li>Click <strong>"Publish"</strong> and copy the URL</li>
+                <li>Paste the URL below along with client name</li>
+            </ol>
+        </div>
+
         <div class="add-client-form">
-            <h3 style="margin-bottom: 15px;">Add New Client</h3>
+            <h3 style="margin-bottom: 15px;">➕ Add New Client</h3>
             <div class="form-group">
                 <label class="form-label">Client Name</label>
-                <input type="text" id="newClientName" class="form-input" placeholder="e.g., acme-corp">
+                <input type="text" id="newClientName" class="form-input" placeholder="e.g., diane">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Published Google Sheets CSV URL</label>
+                <input type="text" id="newClientUrl" class="form-input"
+                    placeholder="https://docs.google.com/spreadsheets/d/e/2PACX-...">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
+                    💡 Make sure the sheet is published as CSV, not as a web page
+                </p>
             </div>
             <button onclick="addClient()" class="btn-primary">Add Client</button>
         </div>
 
-        <h3 style="margin-top: 30px; margin-bottom: 15px;">Your Clients</h3>
+        <h3 style="margin-top: 30px; margin-bottom: 15px;">👥 Your Clients</h3>
         <ul class="client-list" id="clientList"></ul>
     </div>
 
     <script>
-        const CLIENT_STORAGE_KEY = 'articleVisualizer_clients';
+        const CLIENT_CONFIG_KEY = 'articleVisualizer_clientConfig';
 
         function loadClients() {
-            const allClientsData = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY) || '{}');
+            const clientConfig = JSON.parse(localStorage.getItem(CLIENT_CONFIG_KEY) || '{}');
             const clientList = document.getElementById('clientList');
             clientList.innerHTML = '';
 
-            const clients = Object.keys(allClientsData);
+            const clients = Object.keys(clientConfig);
 
             if (clients.length === 0) {
                 clientList.innerHTML = '<li style="text-align: center; color: var(--text-muted); padding: 20px;">No clients yet. Add one above!</li>';
@@ -153,22 +195,22 @@
             }
 
             clients.forEach(clientName => {
-                const articleCount = allClientsData[clientName].length;
-                const url = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?client=${clientName}`;
+                const sheetUrl = clientConfig[clientName];
+                const appUrl = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?client=${clientName}`;
 
                 const li = document.createElement('li');
                 li.className = 'client-item';
                 li.innerHTML = `
-                    <div>
+                    <div style="flex: 1;">
                         <div class="client-name">${clientName}</div>
-                        <div class="client-url">${url}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
-                            ${articleCount} article${articleCount !== 1 ? 's' : ''}
+                        <div class="client-url" style="margin-top: 5px;">${appUrl}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
+                            Sheet: ${sheetUrl.substring(0, 50)}...
                         </div>
                     </div>
                     <div class="client-actions">
                         <button onclick="viewClient('${clientName}')" class="btn-small btn-view">View</button>
-                        <button onclick="copyUrl('${url}')" class="btn-small" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">Copy URL</button>
+                        <button onclick="copyUrl('${appUrl}')" class="btn-small" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">Copy URL</button>
                         <button onclick="deleteClient('${clientName}')" class="btn-small btn-delete">Delete</button>
                     </div>
                 `;
@@ -177,27 +219,43 @@
         }
 
         function addClient() {
-            const input = document.getElementById('newClientName');
-            const clientName = input.value.trim().toLowerCase().replace(/\s+/g, '-');
+            const nameInput = document.getElementById('newClientName');
+            const urlInput = document.getElementById('newClientUrl');
+
+            const clientName = nameInput.value.trim().toLowerCase().replace(/\s+/g, '-');
+            const sheetUrl = urlInput.value.trim();
 
             if (!clientName) {
                 alert('Please enter a client name');
                 return;
             }
 
-            const allClientsData = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY) || '{}');
-
-            if (allClientsData[clientName]) {
-                alert('Client already exists!');
+            if (!sheetUrl) {
+                alert('Please enter the published Google Sheets CSV URL');
                 return;
             }
 
-            allClientsData[clientName] = [];
-            localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(allClientsData));
+            if (!sheetUrl.includes('docs.google.com/spreadsheets')) {
+                alert('Please enter a valid Google Sheets URL');
+                return;
+            }
 
-            input.value = '';
+            const clientConfig = JSON.parse(localStorage.getItem(CLIENT_CONFIG_KEY) || '{}');
+
+            if (clientConfig[clientName]) {
+                if (!confirm(`Client "${clientName}" already exists. Update their sheet URL?`)) {
+                    return;
+                }
+            }
+
+            clientConfig[clientName] = sheetUrl;
+            localStorage.setItem(CLIENT_CONFIG_KEY, JSON.stringify(clientConfig));
+
+            nameInput.value = '';
+            urlInput.value = '';
             loadClients();
-            alert(`Client "${clientName}" created! Click "View" to upload their data.`);
+
+            alert(`✅ Client "${clientName}" ${clientConfig[clientName] ? 'updated' : 'created'}!\n\nShare this URL with them:\n${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?client=${clientName}`);
         }
 
         function viewClient(clientName) {
@@ -206,20 +264,21 @@
 
         function copyUrl(url) {
             navigator.clipboard.writeText(url).then(() => {
-                alert('URL copied to clipboard!');
+                alert('✅ URL copied to clipboard!');
             });
         }
 
         function deleteClient(clientName) {
-            if (!confirm(`Are you sure you want to delete "${clientName}" and all their data?`)) {
+            if (!confirm(`Are you sure you want to delete "${clientName}"?`)) {
                 return;
             }
 
-            const allClientsData = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY) || '{}');
-            delete allClientsData[clientName];
-            localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(allClientsData));
+            const clientConfig = JSON.parse(localStorage.getItem(CLIENT_CONFIG_KEY) || '{}');
+            delete clientConfig[clientName];
+            localStorage.setItem(CLIENT_CONFIG_KEY, JSON.stringify(clientConfig));
 
             loadClients();
+            alert(`✅ Client "${clientName}" deleted`);
         }
 
         // Load clients on page load

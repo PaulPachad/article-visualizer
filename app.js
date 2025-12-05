@@ -1,25 +1,6 @@
-// Multi-Client Support
-const CLIENT_STORAGE_KEY = 'articleVisualizer_clients';
-
-// Get current client from URL parameter
-function getCurrentClient() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('client') || 'default';
-}
-
-// Load client data from localStorage
-function loadClientData() {
-    const clientName = getCurrentClient();
-    const allClientsData = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY) || '{}');
-    return allClientsData[clientName] || [];
-}
-
-// Save client data to localStorage
-function saveClientData(data) {
-    const clientName = getCurrentClient();
-    const allClientsData = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY) || '{}');
-    allClientsData[clientName] = data;
-    localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(allClientsData));
+console.error('Error loading client data:', error);
+return [];
+    }
 }
 
 // App State
@@ -27,9 +8,9 @@ let currentArticles = [];
 let selectedArticle = null;
 
 // Initialize app
-document.addEventListener('DOMContentLoaded', () => {
-    // Load client-specific data
-    const clientData = loadClientData();
+document.addEventListener('DOMContentLoaded', async () => {
+    // Load client-specific data from Google Sheets
+    const clientData = await loadClientData();
     if (clientData.length > 0) {
         articlesData.length = 0;
         articlesData.push(...clientData);
