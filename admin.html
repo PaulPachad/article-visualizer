@@ -197,7 +197,10 @@
 
             clients.forEach(clientName => {
                 const sheetUrl = clientConfig[clientName];
-                const appUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html') + '?client=' + encodeURIComponent(clientName);
+                // Generate shareable URL with sheet parameter embedded
+                const shareableUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html') +
+                    '?client=' + encodeURIComponent(clientName) +
+                    '&sheet=' + encodeURIComponent(sheetUrl);
 
                 const li = document.createElement('li');
                 li.className = 'client-item';
@@ -206,9 +209,9 @@
                 infoDiv.style.flex = '1';
                 infoDiv.innerHTML = `
                     <div class="client-name">${clientName}</div>
-                    <div class="client-url" style="margin-top: 5px;">${appUrl}</div>
+                    <div class="client-url" style="margin-top: 5px;">${shareableUrl}</div>
                     <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
-                        Sheet: ${sheetUrl.substring(0, 50)}...
+                        ✅ This URL works for everyone (including incognito)
                     </div>
                 `;
 
@@ -218,7 +221,7 @@
                 const viewBtn = document.createElement('button');
                 viewBtn.className = 'btn-small btn-view';
                 viewBtn.textContent = 'View';
-                viewBtn.onclick = () => window.location.href = 'index.html?client=' + encodeURIComponent(clientName);
+                viewBtn.onclick = () => window.location.href = shareableUrl;
 
                 const copyBtn = document.createElement('button');
                 copyBtn.className = 'btn-small';
@@ -226,7 +229,7 @@
                 copyBtn.style.border = '1px solid var(--border-color)';
                 copyBtn.textContent = 'Copy URL';
                 copyBtn.onclick = () => {
-                    navigator.clipboard.writeText(appUrl).then(() => alert('✅ URL copied!'));
+                    navigator.clipboard.writeText(shareableUrl).then(() => alert('✅ URL copied!'));
                 };
 
                 const deleteBtn = document.createElement('button');

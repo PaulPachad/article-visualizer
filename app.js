@@ -1,5 +1,6 @@
-// Multi-Client Support - Google Sheets URLs
-const CLIENT_CONFIG_KEY = 'articleVisualizer_clientConfig';
+// Multi-Client Support - URL-Based Configuration
+// Clients can be accessed via: ?client=name&sheet=ENCODED_URL
+// Or via localStorage for convenience
 
 // Get current client from URL parameter
 function getCurrentClient() {
@@ -7,8 +8,22 @@ function getCurrentClient() {
     return urlParams.get('client') || 'default';
 }
 
-// Get client's sheet URL from localStorage
+// Get client's sheet URL from URL parameter or localStorage
 function getClientSheetUrl(clientName) {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // First, check if sheet URL is in the URL itself
+    const sheetParam = urlParams.get('sheet');
+    if (sheetParam) {
+        try {
+            return decodeURIComponent(sheetParam);
+        } catch (e) {
+            console.error('Error decoding sheet URL:', e);
+        }
+    }
+
+    // Otherwise, check localStorage
+    const CLIENT_CONFIG_KEY = 'articleVisualizer_clientConfig';
     const clientConfig = JSON.parse(localStorage.getItem(CLIENT_CONFIG_KEY) || '{}');
     return clientConfig[clientName] || null;
 }
