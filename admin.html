@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Manager - Article Visualizer</title>
+    <title>Client Manager</title>
     <link rel="stylesheet" href="index.css">
     <style>
         .admin-container {
@@ -23,7 +23,62 @@
             text-align: center;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+
+        .help-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: var(--radius-sm);
+        }
+
+        .help-box h4 {
+            margin: 0 0 10px 0;
+            color: #1e40af;
+        }
+
+        .help-box ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .help-box li {
+            margin-bottom: 5px;
+            color: #1e3a8a;
+        }
+
+        .add-client-form {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
         }
 
         .client-list {
@@ -86,60 +141,6 @@
         .btn-delete:hover {
             background: #dc2626;
         }
-
-        .add-client-form {
-            margin-top: 30px;
-            padding: 20px;
-            background: var(--bg-tertiary);
-            border-radius: var(--radius-md);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-        }
-
-        .help-box {
-            background: #eff6ff;
-            border-left: 4px solid #3b82f6;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: var(--radius-sm);
-        }
-
-        .help-box h4 {
-            margin: 0 0 10px 0;
-            color: #1e40af;
-        }
-
-        .help-box ol {
-            margin: 0;
-            padding-left: 20px;
-        }
-
-        .help-box li {
-            margin-bottom: 5px;
-            color: #1e3a8a;
-        }
     </style>
 </head>
 
@@ -196,24 +197,57 @@
 
             clients.forEach(clientName => {
                 const sheetUrl = clientConfig[clientName];
-                const appUrl = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?client=${clientName}`;
+                const appUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html') + '?client=' + encodeURIComponent(clientName);
 
                 const li = document.createElement('li');
                 li.className = 'client-item';
-                li.innerHTML = `
-                    <div style="flex: 1;">
-                        <div class="client-name">${clientName}</div>
-                        <div class="client-url" style="margin-top: 5px;">${appUrl}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
-                            Sheet: ${sheetUrl.substring(0, 50)}...
-                        </div>
-                    </div>
-                    <div class="client-actions">
-                        <button onclick="viewClient('${clientName}')" class="btn-small btn-view">View</button>
-                        <button onclick="copyUrl('${appUrl}')" class="btn-small" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">Copy URL</button>
-                        <button onclick="deleteClient('${clientName}')" class="btn-small btn-delete">Delete</button>
+
+                const infoDiv = document.createElement('div');
+                infoDiv.style.flex = '1';
+                infoDiv.innerHTML = `
+                    <div class="client-name">${clientName}</div>
+                    <div class="client-url" style="margin-top: 5px;">${appUrl}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
+                        Sheet: ${sheetUrl.substring(0, 50)}...
                     </div>
                 `;
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'client-actions';
+
+                const viewBtn = document.createElement('button');
+                viewBtn.className = 'btn-small btn-view';
+                viewBtn.textContent = 'View';
+                viewBtn.onclick = () => window.location.href = 'index.html?client=' + encodeURIComponent(clientName);
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'btn-small';
+                copyBtn.style.background = 'var(--bg-secondary)';
+                copyBtn.style.border = '1px solid var(--border-color)';
+                copyBtn.textContent = 'Copy URL';
+                copyBtn.onclick = () => {
+                    navigator.clipboard.writeText(appUrl).then(() => alert('✅ URL copied!'));
+                };
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn-small btn-delete';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = () => {
+                    if (confirm('Are you sure you want to delete "' + clientName + '"?')) {
+                        const config = JSON.parse(localStorage.getItem(CLIENT_CONFIG_KEY) || '{}');
+                        delete config[clientName];
+                        localStorage.setItem(CLIENT_CONFIG_KEY, JSON.stringify(config));
+                        loadClients();
+                        alert('✅ Client "' + clientName + '" deleted');
+                    }
+                };
+
+                actionsDiv.appendChild(viewBtn);
+                actionsDiv.appendChild(copyBtn);
+                actionsDiv.appendChild(deleteBtn);
+
+                li.appendChild(infoDiv);
+                li.appendChild(actionsDiv);
                 clientList.appendChild(li);
             });
         }
@@ -243,7 +277,7 @@
             const clientConfig = JSON.parse(localStorage.getItem(CLIENT_CONFIG_KEY) || '{}');
 
             if (clientConfig[clientName]) {
-                if (!confirm(`Client "${clientName}" already exists. Update their sheet URL?`)) {
+                if (!confirm('Client "' + clientName + '" already exists. Update their sheet URL?')) {
                     return;
                 }
             }
@@ -255,30 +289,8 @@
             urlInput.value = '';
             loadClients();
 
-            alert(`✅ Client "${clientName}" ${clientConfig[clientName] ? 'updated' : 'created'}!\n\nShare this URL with them:\n${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?client=${clientName}`);
-        }
-
-        function viewClient(clientName) {
-            window.location.href = `index.html?client=${clientName}`;
-        }
-
-        function copyUrl(url) {
-            navigator.clipboard.writeText(url).then(() => {
-                alert('✅ URL copied to clipboard!');
-            });
-        }
-
-        function deleteClient(clientName) {
-            if (!confirm(`Are you sure you want to delete "${clientName}"?`)) {
-                return;
-            }
-
-            const clientConfig = JSON.parse(localStorage.getItem(CLIENT_CONFIG_KEY) || '{}');
-            delete clientConfig[clientName];
-            localStorage.setItem(CLIENT_CONFIG_KEY, JSON.stringify(clientConfig));
-
-            loadClients();
-            alert(`✅ Client "${clientName}" deleted`);
+            const appUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html') + '?client=' + encodeURIComponent(clientName);
+            alert('✅ Client "' + clientName + '" added!\n\nShare this URL:\n' + appUrl);
         }
 
         // Load clients on page load
