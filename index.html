@@ -19,48 +19,53 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <h1 class="logo">
-                    <span class="logo-icon">📰</span>
-                    Authority Magazine
-                </h1>
-                <p class="tagline">Interview Archive & Portal</p>
+                <div class="logo-container">
+                    <!-- Replace 'logo.png' with your actual logo file -->
+                    <img src="logo.png" alt="Authority Magazine" class="logo-image" onerror="this.style.display='none'">
+                    <h1 class="logo">
+                        <span id="client-name">Authority Magazine</span>
+                    </h1>
+                </div>
                 <a href="admin.html"
-                    style="position: absolute; top: 20px; right: 20px; padding: 8px 16px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); text-decoration: none; color: var(--text-primary); font-size: 0.9rem; font-weight: 600;">
-                    ⚙️ Manage Clients
+                    style="padding: 6px 14px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 20px; text-decoration: none; color: var(--text-secondary); font-size: 14px; font-weight: 500; transition: var(--transition-base);"
+                    onmouseover="this.style.background='var(--bg-card-hover)'"
+                    onmouseout="this.style.background='var(--bg-tertiary)'">
+                    Manage Clients
                 </a>
             </div>
+        </header>
 
-            <!-- Search and Filter Bar -->
-            <div class="controls">
-                <div class="search-box">
-                    <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <input type="text" id="searchInput" placeholder="Search articles, interviewees, topics..."
-                        class="search-input">
-                </div>
-
-                <div class="filter-group">
-                    <select id="topicFilter" class="filter-select">
-                        <option value="">All Topics</option>
-                    </select>
-
-                    <select id="statusFilter" class="filter-select">
-                        <option value="">All Status</option>
-                        <option value="published">Published</option>
-                        <option value="pending">Pending</option>
-                    </select>
-
-                    <button id="importBtn" class="import-btn">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M10 3v12m0 0l-4-4m4 4l4-4M3 17h14" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        Import CSV
-                    </button>
-                </div>
+        <!-- Search and Filter Bar -->
+        <div class="controls">
+            <div class="search-box">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search articles, interviewees, topics..."
+                    class="search-input">
             </div>
+
+            <div class="filter-group">
+                <select id="topicFilter" class="filter-select">
+                    <option value="">All Topics</option>
+                </select>
+
+                <select id="statusFilter" class="filter-select">
+                    <option value="">All Status</option>
+                    <option value="published">Published</option>
+                    <option value="pending">Pending</option>
+                </select>
+
+                <button id="importBtn" class="import-btn">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 3v12m0 0l-4-4m4 4l4-4M3 17h14" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Import CSV
+                </button>
+            </div>
+        </div>
         </header>
 
         <!-- Main Content -->

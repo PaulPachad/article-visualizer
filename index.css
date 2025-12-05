@@ -1,28 +1,28 @@
 :root {
-    /* Color Palette - Clean White Theme */
-    --bg-primary: #f8f9fa;
+    /* Apple-inspired Color Palette */
+    --bg-primary: #fafafa;
     --bg-secondary: #ffffff;
-    --bg-tertiary: #f1f3f5;
+    --bg-tertiary: #f5f5f7;
     --bg-card: #ffffff;
-    --bg-card-hover: #f8f9fa;
+    --bg-card-hover: #f5f5f7;
 
-    --accent-primary: #2563eb;
-    --accent-secondary: #3b82f6;
-    --accent-gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    --accent-primary: #0071e3;
+    --accent-secondary: #0077ed;
+    --accent-gradient: linear-gradient(135deg, #0071e3 0%, #0077ed 100%);
 
-    --text-primary: #1e293b;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
+    --text-primary: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-muted: #86868b;
 
-    --border-color: #e2e8f0;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-    --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.2);
+    --border-color: #d2d2d7;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 20px rgba(0, 113, 227, 0.15);
 
-    /* Typography */
-    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-display: 'Playfair Display', serif;
+    /* Typography - SF Pro Display/Text */
+    --font-primary: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
 
     /* Spacing */
     --spacing-xs: 0.5rem;
@@ -31,10 +31,10 @@
     --spacing-lg: 2rem;
     --spacing-xl: 3rem;
 
-    /* Border Radius */
+    /* Border Radius - Apple uses subtle curves */
     --radius-sm: 8px;
     --radius-md: 12px;
-    --radius-lg: 16px;
+    --radius-lg: 18px;
     --radius-xl: 24px;
 
     /* Transitions */
@@ -53,54 +53,70 @@ body {
     font-family: var(--font-primary);
     background: var(--bg-primary);
     color: var(--text-primary);
-    line-height: 1.6;
+    line-height: 1.47059;
+    font-weight: 400;
+    letter-spacing: -0.022em;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 
 .app-container {
     min-height: 100vh;
 }
 
-/* Header */
+/* Header - Apple Style */
 .header {
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: saturate(180%) blur(20px);
     border-bottom: 1px solid var(--border-color);
-    padding: var(--spacing-lg) var(--spacing-xl);
+    padding: 16px var(--spacing-xl);
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: var(--shadow-sm);
 }
 
 .header-content {
-    text-align: center;
-    margin-bottom: var(--spacing-md);
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-image {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
 }
 
 .logo {
     font-family: var(--font-display);
-    font-size: 2.5rem;
-    font-weight: 700;
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    display: inline-flex;
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-xs);
 }
 
 .logo-icon {
-    font-size: 2rem;
+    font-size: 1.5rem;
 }
 
 .tagline {
     color: var(--text-muted);
-    font-size: 0.95rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    font-size: 14px;
+    font-weight: 400;
 }
+
 
 /* Controls */
 .controls {
@@ -838,6 +854,7 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent-primary);
 }
+
 /* File Upload Area */
 .file-upload-area {
     border: 2px dashed var(--border-color);
