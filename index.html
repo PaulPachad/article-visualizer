@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authority Magazine - Article Portal</title>
+    <meta name="description" content="Beautiful visualization of Authority Magazine articles and interviews">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">
+                    <span class="logo-icon">📰</span>
+                    Authority Magazine
+                </h1>
+                <p class="tagline">Interview Archive & Portal</p>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div class="controls">
+                <div class="search-box">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search articles, interviewees, topics..."
+                        class="search-input">
+                </div>
+
+                <div class="filter-group">
+                    <select id="topicFilter" class="filter-select">
+                        <option value="">All Topics</option>
+                    </select>
+
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="published">Published</option>
+                        <option value="pending">Pending</option>
+                    </select>
+
+                    <button id="importBtn" class="import-btn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 3v12m0 0l-4-4m4 4l4-4M3 17h14" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        Import CSV
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Articles Grid -->
+            <div class="articles-grid" id="articlesGrid">
+                <!-- Articles will be dynamically inserted here -->
+            </div>
+
+            <!-- Side Panel -->
+            <aside class="side-panel" id="sidePanel">
+                <div class="panel-content">
+                    <button class="close-panel" id="closePanel">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" />
+                        </svg>
+                    </button>
+
+                    <div id="panelDetails">
+                        <!-- Details will be dynamically inserted here -->
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Import CSV Data</h2>
+                <button class="close-modal" id="closeModal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <p class="modal-instructions">
+                    Upload your Google Sheets data as a CSV file.
+                </p>
+
+                <!-- CSV File Upload -->
+                <div class="file-upload-area" id="fileUploadArea">
+                    <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+                    <div class="upload-icon">📄</div>
+                    <p class="upload-text">Click to upload CSV file</p>
+                    <p class="upload-hint">Or drag and drop your file here</p>
+                </div>
+
+                <div class="modal-help">
+                    <h3 class="help-title">📋 How to export from Google Sheets:</h3>
+                    <ol class="help-list">
+                        <li>Open your Google Sheet</li>
+                        <li>Click <strong>File → Download → Comma Separated Values (.csv)</strong></li>
+                        <li>Upload the downloaded CSV file above</li>
+                    </ol>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        💡 <strong>Tip:</strong> This takes just 10 seconds and works every time!
+                    </p>
+                </div>
+
+                <div id="importStatus" class="import-status"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="cancelImport" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
