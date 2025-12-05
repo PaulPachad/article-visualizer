@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Manager - Article Visualizer</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 40px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .admin-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .client-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .client-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .client-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .client-url {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .client-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition-base);
+        }
+
+        .btn-view {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+        .add-client-form {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+        <h1 class="admin-title">📊 Client Manager</h1>
+
+        <div class="add-client-form">
+            <h3 style="margin-bottom: 15px;">Add New Client</h3>
+            <div class="form-group">
+                <label class="form-label">Client Name</label>
+                <input type="text" id="newClientName" class="form-input" placeholder="e.g., acme-corp">
+            </div>
+            <button onclick="addClient()" class="btn-primary">Add Client</button>
+        </div>
+
+        <h3 style="margin-top: 30px; margin-bottom: 15px;">Your Clients</h3>
+        <ul class="client-list" id="clientList"></ul>
+    </div>
+
+    <script>
+        const CLIENT_STORAGE_KEY = 'articleVisualizer_clients';
+
+        function loadClients() {
+            const allClientsData = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY) || '{}');
+            const clientList = document.getElementById('clientList');
+            clientList.innerHTML = '';
+
+            const clients = Object.keys(allClientsData);
+
+            if (clients.length === 0) {
+                clientList.innerHTML = '<li style="text-align: center; color: var(--text-muted); padding: 20px;">No clients yet. Add one above!</li>';
+                return;
+            }
+
+            clients.forEach(clientName => {
+                const articleCount = allClientsData[clientName].length;
+                const url = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?client=${clientName}`;
+
+                const li = document.createElement('li');
+                li.className = 'client-item';
+                li.innerHTML = `
+                    <div>
+                        <div class="client-name">${clientName}</div>
+                        <div class="client-url">${url}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
+                            ${articleCount} article${articleCount !== 1 ? 's' : ''}
+                        </div>
+                    </div>
+                    <div class="client-actions">
+                        <button onclick="viewClient('${clientName}')" class="btn-small btn-view">View</button>
+                        <button onclick="copyUrl('${url}')" class="btn-small" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">Copy URL</button>
+                        <button onclick="deleteClient('${clientName}')" class="btn-small btn-delete">Delete</button>
+                    </div>
+                `;
+                clientList.appendChild(li);
+            });
+        }
+
+        function addClient() {
+            const input = document.getElementById('newClientName');
+            const clientName = input.value.trim().toLowerCase().replace(/\s+/g, '-');
+
+            if (!clientName) {
+                alert('Please enter a client name');
+                return;
+            }
+
+            const allClientsData = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY) || '{}');
+
+            if (allClientsData[clientName]) {
+                alert('Client already exists!');
+                return;
+            }
+
+            allClientsData[clientName] = [];
+            localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(allClientsData));
+
+            input.value = '';
+            loadClients();
+            alert(`Client "${clientName}" created! Click "View" to upload their data.`);
+        }
+
+        function viewClient(clientName) {
+            window.location.href = `index.html?client=${clientName}`;
+        }
+
+        function copyUrl(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('URL copied to clipboard!');
+            });
+        }
+
+        function deleteClient(clientName) {
+            if (!confirm(`Are you sure you want to delete "${clientName}" and all their data?`)) {
+                return;
+            }
+
+            const allClientsData = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY) || '{}');
+            delete allClientsData[clientName];
+            localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(allClientsData));
+
+            loadClients();
+        }
+
+        // Load clients on page load
+        loadClients();
+    </script>
+</body>
+
+</html>

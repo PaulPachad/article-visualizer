@@ -1,13 +1,59 @@
+// Multi-Client Support
+const CLIENT_STORAGE_KEY = 'articleVisualizer_clients';
+
+// Get current client from URL parameter
+function getCurrentClient() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('client') || 'default';
+}
+
+// Load client data from localStorage
+function loadClientData() {
+    const clientName = getCurrentClient();
+    const allClientsData = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY) || '{}');
+    return allClientsData[clientName] || [];
+}
+
+// Save client data to localStorage
+function saveClientData(data) {
+    const clientName = getCurrentClient();
+    const allClientsData = JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEY) || '{}');
+    allClientsData[clientName] = data;
+    localStorage.setItem(CLIENT_STORAGE_KEY, JSON.stringify(allClientsData));
+}
+
 // App State
-let currentArticles = [...articlesData];
+let currentArticles = [];
 let selectedArticle = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
+    // Load client-specific data
+    const clientData = loadClientData();
+    if (clientData.length > 0) {
+        articlesData.length = 0;
+        articlesData.push(...clientData);
+        currentArticles = [...articlesData];
+    } else {
+        currentArticles = [...articlesData];
+    }
+
+    // Show client name in header
+    updateClientHeader();
+
     initializeFilters();
     renderArticles(currentArticles);
     setupEventListeners();
 });
+
+// Update header to show client name
+function updateClientHeader() {
+    const clientName = getCurrentClient();
+    if (clientName !== 'default') {
+        const tagline = document.querySelector('.tagline');
+        tagline.textContent = `Interview Archive & Portal - ${clientName.charAt(0).toUpperCase() + clientName.slice(1)}`;
+    }
+}
 
 // Initialize filter dropdowns
 function initializeFilters() {
@@ -453,6 +499,9 @@ function handleFile(file) {
             articlesData.length = 0;
             articlesData.push(...parsedData);
             currentArticles = [...articlesData];
+
+            // Save to localStorage for this client
+            saveClientData(parsedData);
 
             // Refresh UI
             initializeFilters();
