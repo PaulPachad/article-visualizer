@@ -329,20 +329,6 @@ function openSidePanel(index) {
         </div>
         ` : ''}
         
-        ${selectedArticle.socialMedia.length > 0 ? `
-        <div class="panel-section">
-            <h3 class="section-title">Social Media</h3>
-            <div class="social-links">
-                ${selectedArticle.socialMedia.map(social => `
-                    <a href="https://${social.url}" target="_blank" class="social-link">
-                        ${getSocialIcon(social.platform)}
-                        ${social.platform}
-                    </a>
-                `).join('')}
-            </div>
-        </div>
-        ` : ''}
-        
         <div class="panel-section">
             <h3 class="section-title">Article Links</h3>
             <div class="article-links">
