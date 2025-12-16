@@ -562,6 +562,9 @@ function parseCSV(csvText) {
 
         const values = parseCSVLine(lines[i]);
 
+        // Skip rows where interviewee name (column B) is blank
+        if (!values[1] || !values[1].trim()) continue;
+
         // Check columns R, S, T for a live Medium article URL
         const columnR = values[17] || '';
         const columnS = values[18] || '';
