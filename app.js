@@ -379,6 +379,8 @@ function closeSidePanel() {
 // Format date
 function formatDate(dateString) {
     if (!dateString) return 'Not set';
+    // If the value is "LIVE", just display it as-is
+    if (dateString.toUpperCase().trim() === 'LIVE') return 'LIVE';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
         year: 'numeric',
@@ -599,7 +601,7 @@ function parseCSV(csvText) {
             intervieweeEmail: isSocialUrl ? '' : emailValue,
             publicistEmail: values[13] || '',
             socialMedia: parseSocialMedia(values),
-            publishDate: values[16] || '',
+            publishDate: values[17] || '', // Column R
             authorityMagazineLink: mediumLink,
             buzzfeedLink: values[19] || '',
             status: isPublished ? 'published' : 'pending',
