@@ -152,10 +152,9 @@
             <h4>📋 How to Add a Client:</h4>
             <ol>
                 <li>Open the client's Google Sheet</li>
-                <li>Click <strong>File → Share → Publish to web</strong></li>
-                <li>Select <strong>"Comma-separated values (.csv)"</strong> from dropdown</li>
-                <li>Click <strong>"Publish"</strong> and copy the URL</li>
-                <li>Paste the URL below along with client name</li>
+                <li>Ensure the sheet is public by clicking <strong>Share</strong> and selecting <strong>"Anyone with the link can view"</strong></li>
+                <li>Copy the URL from your browser's address bar</li>
+                <li>Paste the URL below along with the client name</li>
             </ol>
         </div>
 
@@ -166,11 +165,11 @@
                 <input type="text" id="newClientName" class="form-input" placeholder="e.g., diane">
             </div>
             <div class="form-group">
-                <label class="form-label">Published Google Sheets CSV URL</label>
+                <label class="form-label">Google Sheets URL</label>
                 <input type="text" id="newClientUrl" class="form-input"
-                    placeholder="https://docs.google.com/spreadsheets/d/e/2PACX-...">
+                    placeholder="https://docs.google.com/spreadsheets/d/1JgsXyxZJbxI7KySr4WmBbH-a-2HaMsIXEL65amReKZw/edit...">
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
-                    💡 Make sure the sheet is published as CSV, not as a web page
+                    💡 Ensure the sheet sharing settings are set to "Anyone with the link can view"
                 </p>
             </div>
             <button onclick="addClient()" class="btn-primary">Add Client</button>
@@ -260,7 +259,7 @@
             const urlInput = document.getElementById('newClientUrl');
 
             const clientName = nameInput.value.trim().toLowerCase().replace(/\s+/g, '-');
-            const sheetUrl = urlInput.value.trim();
+            let sheetUrl = urlInput.value.trim();
 
             if (!clientName) {
                 alert('Please enter a client name');
@@ -268,13 +267,25 @@
             }
 
             if (!sheetUrl) {
-                alert('Please enter the published Google Sheets CSV URL');
+                alert('Please enter the Google Sheets URL');
                 return;
             }
 
             if (!sheetUrl.includes('docs.google.com/spreadsheets')) {
                 alert('Please enter a valid Google Sheets URL');
                 return;
+            }
+
+            // Try to convert a regular sheet URL to an export CSV URL
+            const match = sheetUrl.match(/https:\/\/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            if (match && !sheetUrl.includes('/pub?')) {
+                const sheetId = match[1];
+                let gid = "0";
+                const gidMatch = sheetUrl.match(/gid=([0-9]+)/);
+                if (gidMatch) {
+                    gid = gidMatch[1];
+                }
+                sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
             }
 
             const clientConfig = JSON.parse(localStorage.getItem(CLIENT_CONFIG_KEY) || '{}');

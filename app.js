@@ -472,11 +472,16 @@ function handleUrlImport() {
     // Check if it's already a published CSV URL
     let csvUrl = url;
 
-    // If it's a regular sheet URL, try to convert it
-    if (url.includes('/edit') && !url.includes('2PACX')) {
-        statusDiv.className = 'import-status error';
-        statusDiv.innerHTML = '⚠️ Please use a <strong>published CSV URL</strong>.<br><small>Go to File → Share → Publish to web → Select "CSV" format</small>';
-        return;
+    // Try to convert a regular sheet URL to an export CSV URL
+    const match = url.match(/https:\/\/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    if (match && !url.includes('/pub?')) {
+        const sheetId = match[1];
+        let gid = "0";
+        const gidMatch = url.match(/gid=([0-9]+)/);
+        if (gidMatch) {
+            gid = gidMatch[1];
+        }
+        csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
     }
 
     console.log('Fetching CSV from:', csvUrl);
