@@ -120,35 +120,73 @@ function setupEventListeners() {
     topicFilter.addEventListener('change', handleFilter);
     statusFilter.addEventListener('change', handleFilter);
     closePanel.addEventListener('click', closeSidePanel);
-
     // Import modal listeners
-    importBtn.addEventListener('click', openImportModal);
-    closeModal.addEventListener('click', closeImportModal);
-    cancelImport.addEventListener('click', closeImportModal);
+    if (importBtn) importBtn.addEventListener('click', openImportModal);
+    if (closeModal) closeModal.addEventListener('click', closeImportModal);
+    if (cancelImport) cancelImport.addEventListener('click', closeImportModal);
 
     // File upload listeners
-    fileUploadArea.addEventListener('click', () => csvFileInput.click());
-    csvFileInput.addEventListener('change', handleFileSelect);
+    if (fileUploadArea && csvFileInput) {
+        fileUploadArea.addEventListener('click', () => csvFileInput.click());
+        csvFileInput.addEventListener('change', handleFileSelect);
 
-    // Drag and drop
-    fileUploadArea.addEventListener('dragover', (e) => {
+        // Drag and drop within modal
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = 'var(--accent-primary)';
+            fileUploadArea.style.background = 'rgba(37, 99, 235, 0.05)';
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.style.borderColor = 'var(--border-color)';
+            fileUploadArea.style.background = 'var(--bg-tertiary)';
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = 'var(--border-color)';
+            fileUploadArea.style.background = 'var(--bg-tertiary)';
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+    }
+
+    // Global drag and drop listeners
+    const globalDropzone = document.getElementById('globalDropzone');
+    let dragCounter = 0;
+
+    document.addEventListener('dragover', (e) => {
         e.preventDefault();
-        fileUploadArea.style.borderColor = 'var(--accent-primary)';
-        fileUploadArea.style.background = 'rgba(37, 99, 235, 0.05)';
     });
 
-    fileUploadArea.addEventListener('dragleave', () => {
-        fileUploadArea.style.borderColor = 'var(--border-color)';
-        fileUploadArea.style.background = 'var(--bg-tertiary)';
+    document.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        dragCounter++;
+        if (globalDropzone) {
+            globalDropzone.classList.add('active');
+        }
     });
 
-    fileUploadArea.addEventListener('drop', (e) => {
+    document.addEventListener('dragleave', (e) => {
         e.preventDefault();
-        fileUploadArea.style.borderColor = 'var(--border-color)';
-        fileUploadArea.style.background = 'var(--bg-tertiary)';
+        dragCounter--;
+        if (dragCounter === 0 && globalDropzone) {
+            globalDropzone.classList.remove('active');
+        }
+    });
+
+    document.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragCounter = 0;
+        if (globalDropzone) {
+            globalDropzone.classList.remove('active');
+        }
 
         const files = e.dataTransfer.files;
-        if (files.length > 0 && files[0].name.endsWith('.csv')) {
+        if (files.length > 0) {
             handleFile(files[0]);
         }
     });
@@ -156,7 +194,7 @@ function setupEventListeners() {
     // Close panel when clicking outside
     document.addEventListener('click', (e) => {
         const sidePanel = document.getElementById('sidePanel');
-        if (sidePanel.classList.contains('active') &&
+        if (sidePanel && sidePanel.classList.contains('active') &&
             !sidePanel.contains(e.target) &&
             !e.target.closest('.article-card')) {
             closeSidePanel();
@@ -164,7 +202,7 @@ function setupEventListeners() {
 
         // Close modal when clicking outside
         const modal = document.getElementById('importModal');
-        if (modal.classList.contains('active') && e.target === modal) {
+        if (modal && modal.classList.contains('active') && e.target === modal) {
             closeImportModal();
         }
     });
@@ -434,11 +472,16 @@ function handleUrlImport() {
     // Check if it's already a published CSV URL
     let csvUrl = url;
 
-    // If it's a regular sheet URL, try to convert it
-    if (url.includes('/edit') && !url.includes('2PACX')) {
-        statusDiv.className = 'import-status error';
-        statusDiv.innerHTML = '⚠️ Please use a <strong>published CSV URL</strong>.<br><small>Go to File → Share → Publish to web → Select "CSV" format</small>';
-        return;
+    // Try to convert a regular sheet URL to an export CSV URL
+    const match = url.match(/https:\/\/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    if (match && !url.includes('/pub?')) {
+        const sheetId = match[1];
+        let gid = "0";
+        const gidMatch = url.match(/gid=([0-9]+)/);
+        if (gidMatch) {
+            gid = gidMatch[1];
+        }
+        csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
     }
 
     console.log('Fetching CSV from:', csvUrl);
@@ -497,58 +540,98 @@ function handleFileSelect(e) {
 
 function handleFile(file) {
     const statusDiv = document.getElementById('importStatus');
+    const isCsv = file.name.endsWith('.csv');
+    const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
 
-    if (!file.name.endsWith('.csv')) {
-        statusDiv.className = 'import-status error';
-        statusDiv.textContent = '⚠️ Please upload a CSV file';
+    if (!isCsv && !isExcel) {
+        if (statusDiv) {
+            statusDiv.className = 'import-status error';
+            statusDiv.textContent = '⚠️ Please upload a .csv, .xls, or .xlsx file';
+        }
         return;
     }
 
-    statusDiv.className = 'import-status loading';
-    statusDiv.textContent = '⏳ Reading CSV file...';
+    if (statusDiv) {
+        statusDiv.className = 'import-status loading';
+        statusDiv.textContent = '⏳ Reading file...';
+    }
 
     const reader = new FileReader();
 
-    reader.onload = function (e) {
-        try {
-            const csvText = e.target.result;
-            const parsedData = parseCSV(csvText);
-
-            if (parsedData.length === 0) {
-                throw new Error('No data found in the CSV file');
+    if (isCsv) {
+        reader.onload = function (e) {
+            processCsvText(e.target.result, statusDiv);
+        };
+        reader.onerror = function () {
+            if (statusDiv) {
+                statusDiv.className = 'import-status error';
+                statusDiv.textContent = '⚠️ Error reading file';
             }
+        };
+        reader.readAsText(file);
+    } else if (isExcel) {
+        reader.onload = function (e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const csvText = XLSX.utils.sheet_to_csv(worksheet);
+                processCsvText(csvText, statusDiv);
+            } catch (error) {
+                console.error("Excel Parsing Error:", error);
+                if (statusDiv) {
+                    statusDiv.className = 'import-status error';
+                    statusDiv.textContent = '⚠️ Error reading Excel file: ' + error.message;
+                }
+            }
+        };
+        reader.onerror = function () {
+            if (statusDiv) {
+                statusDiv.className = 'import-status error';
+                statusDiv.textContent = '⚠️ Error reading file';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+}
 
-            // Update global data
-            articlesData.length = 0;
-            articlesData.push(...parsedData);
-            currentArticles = [...articlesData];
+function processCsvText(csvText, statusDiv) {
+    try {
+        const parsedData = parseCSV(csvText);
 
-            // Save to localStorage for this client
-            saveClientData(parsedData);
+        if (parsedData.length === 0) {
+            throw new Error('No data found in the file');
+        }
 
-            // Refresh UI
-            initializeFilters();
-            renderArticles(currentArticles);
+        // Update global data
+        articlesData.length = 0;
+        articlesData.push(...parsedData);
+        currentArticles = [...articlesData];
 
+        // Save to localStorage for dropped data persistence
+        saveClientData(parsedData);
+
+        // Refresh UI
+        initializeFilters();
+        renderArticles(currentArticles);
+
+        if (statusDiv) {
             statusDiv.className = 'import-status success';
             statusDiv.textContent = `✅ Successfully imported ${parsedData.length} articles!`;
+        }
 
-            setTimeout(() => {
-                closeImportModal();
-            }, 2000);
+        setTimeout(() => {
+            closeImportModal();
+        }, 2000);
 
-        } catch (error) {
+    } catch (error) {
+        if (statusDiv) {
             statusDiv.className = 'import-status error';
             statusDiv.textContent = `⚠️ Error: ${error.message}`;
         }
-    };
-
-    reader.onerror = function () {
-        statusDiv.className = 'import-status error';
-        statusDiv.textContent = '⚠️ Error reading file';
-    };
-
-    reader.readAsText(file);
+        console.error("Error processing CSV:", error);
+    }
 }
 
 function parseCSV(csvText) {
@@ -571,12 +654,18 @@ function parseCSV(csvText) {
         const columnT = values[19] || '';
 
         // Find which column has the Medium article URL (prioritize S, then R, then T)
+        const isMediumLink = (link) => {
+            if (!link) return false;
+            const lower = link.toLowerCase();
+            return lower.includes('medium.com/authority-magazine') || lower.includes('medium.com/p/');
+        };
+
         let mediumLink = '';
-        if (columnS && columnS.toLowerCase().includes('medium.com/authority-magazine')) {
+        if (isMediumLink(columnS)) {
             mediumLink = columnS;
-        } else if (columnR && columnR.toLowerCase().includes('medium.com/authority-magazine')) {
+        } else if (isMediumLink(columnR)) {
             mediumLink = columnR;
-        } else if (columnT && columnT.toLowerCase().includes('medium.com/authority-magazine')) {
+        } else if (isMediumLink(columnT)) {
             mediumLink = columnT;
         }
 
@@ -723,4 +812,14 @@ function extractImageUrl(text) {
 
     console.warn('No valid image URL found in:', text);
     return '';
+}
+
+// Save local data to localStorage
+function saveClientData(data) {
+    try {
+        localStorage.setItem('articleVisualizer_droppedData', JSON.stringify(data));
+        console.log('Saved dropped data to localStorage');
+    } catch (e) {
+        console.error('Error saving local data:', e);
+    }
 }
