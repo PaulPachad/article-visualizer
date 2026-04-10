@@ -116,42 +116,46 @@ function setupEventListeners() {
     const fileUploadArea = document.getElementById('fileUploadArea');
     const csvFileInput = document.getElementById('csvFileInput');
 
-    searchInput.addEventListener('input', handleSearch);
-    topicFilter.addEventListener('change', handleFilter);
-    statusFilter.addEventListener('change', handleFilter);
-    closePanel.addEventListener('click', closeSidePanel);
+    if (searchInput) searchInput.addEventListener('input', handleSearch);
+    if (topicFilter) topicFilter.addEventListener('change', handleFilter);
+    if (statusFilter) statusFilter.addEventListener('change', handleFilter);
+    if (closePanel) closePanel.addEventListener('click', closeSidePanel);
 
     // Import modal listeners
-    importBtn.addEventListener('click', openImportModal);
-    closeModal.addEventListener('click', closeImportModal);
-    cancelImport.addEventListener('click', closeImportModal);
+    if (importBtn) importBtn.addEventListener('click', openImportModal);
+    if (closeModal) closeModal.addEventListener('click', closeImportModal);
+    if (cancelImport) cancelImport.addEventListener('click', closeImportModal);
 
     // File upload listeners
-    fileUploadArea.addEventListener('click', () => csvFileInput.click());
-    csvFileInput.addEventListener('change', handleFileSelect);
+    if (fileUploadArea && csvFileInput) {
+        fileUploadArea.addEventListener('click', () => csvFileInput.click());
+        csvFileInput.addEventListener('change', handleFileSelect);
+    }
 
     // Drag and drop
-    fileUploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        fileUploadArea.style.borderColor = 'var(--accent-primary)';
-        fileUploadArea.style.background = 'rgba(37, 99, 235, 0.05)';
-    });
+    if (fileUploadArea) {
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = 'var(--accent-primary)';
+            fileUploadArea.style.background = 'rgba(37, 99, 235, 0.05)';
+        });
 
-    fileUploadArea.addEventListener('dragleave', () => {
-        fileUploadArea.style.borderColor = 'var(--border-color)';
-        fileUploadArea.style.background = 'var(--bg-tertiary)';
-    });
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.style.borderColor = 'var(--border-color)';
+            fileUploadArea.style.background = 'var(--bg-tertiary)';
+        });
 
-    fileUploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        fileUploadArea.style.borderColor = 'var(--border-color)';
-        fileUploadArea.style.background = 'var(--bg-tertiary)';
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = 'var(--border-color)';
+            fileUploadArea.style.background = 'var(--bg-tertiary)';
 
-        const files = e.dataTransfer.files;
-        if (files.length > 0 && files[0].name.endsWith('.csv')) {
-            handleFile(files[0]);
-        }
-    });
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].name.endsWith('.csv')) {
+                handleFile(files[0]);
+            }
+        });
+    }
 
     // Close panel when clicking outside
     document.addEventListener('click', (e) => {
